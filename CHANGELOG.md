@@ -1,5 +1,13 @@
 # ejx-template-cube
 
+## 0.1.4
+
+### Patch Changes
+
+- Improved developer documentation
+- Updated dependencies
+  - @eyejack/ejx@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
