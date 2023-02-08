@@ -1,39 +1,83 @@
-# Artcube Project
+# EJX Artcube Template Project
 
-This is an example of an eyejack artcube project that a user might work with.
+This repo is a template to start building EyeJackX AR experiences.  It uses vite
+to bundle and import the `@eyejack/ejx` library to interface with the EJX player.
 
-It is built as an app and exports a few files.
+## Getting Started
 
-- dist/index.html (this is the boilerplate so it runs on users computer and
-  can be deleted);
-- dist/assets/index-[hash].js (this is the boilerplate so it runs on users
-  computer and can be deleted)
-- dist/assets/main-[hash].js This is the entry point of the user's experience
-  that references all other files and assets.
-- dist/assets/**.* (everything else) These are other dependencies that are have
-  been bundled and everything is linked together, automatically loaded using
-  relative paths.
+First clone the repo with your project name.
 
-## Caveats
+```bash
+npx degit https://github.com/eyejackapp/ejx-template-cube project-name
+```
 
-- Need to define which assets can be imported inside of `vite.config.js`.
-  - Solution: We can setup the boilerplate to support all reasonable assets
-    (all 3d, audio, video, image, font file types)
-  - If the user is using assets outside of these standard ones I think it's fair
-    to assume they'll know how to add their own assets automatically.
-  - We can document this and put it in the docs.
-- Not sure how public folder will work.
-  - While the user will be able to use the public/static folder on their local
-    machine, it's a little prone to error if user uses absolute paths.
-  - Solution: Document not to use public folder, direct them to imported assets.
-  - If they really want to use the public folder we can provide the base path
-    of their current experience so they can join the path themselves.
-- Small painpoint bundling library assets.  Currently ej-lib has some assets
-  that need to be bundled with it.
-  - This includes some HDR textures and stuff.  Sadly vite only supports inline
-    compile time asset bundling for libraries.  What this means is that, using
-    the regular `import MyAsset from './my-asset.jpg` syntax, assets are inlined
-    into the javascript (large file size, must import everything, inefficient).
-  - Solution: Copy the library assets into the `public/` folder of the user's
-    project.  Another option is if we are creating a CLI tool, that tool could
-    wrap vite and auto-inject the most up to date library assets.
+Then jump into your folder and install dependencies.
+
+```bash
+cd project-name
+yarn i
+```
+
+### Developing
+
+Start the dev server by running `yarn dev`.  This will create a hot-reloading
+dev environment with vite.  The entrypoint of your EJX experience is content.js.
+Extra javascript files or libraries can be included using regular import syntax.
+When you're ready to build, run `yarn build`.
+
+## FAQ
+
+### Adding assets
+
+Currently assets need to be imported through javascript to be included in the
+final bundle.  These imports result in the path to load a specific asset.
+
+```javascript
+import MyImgSrc from './assets/my-image.png';
+console.log(MyImgSrc); // '/path/to/load/my-image.png'
+
+const texture = new THREE.TextureLoader().load(MyImgSrc); // Texture of my image.
+```
+
+An alternative approach is to keep the assets in the `public/` folder.
+
+> :warning: Any assets loaded from the public folder MUST use relative paths
+> or they will not work when deployed.
+
+```javascript
+// - public/
+// -   my-image.png
+
+const MyImgSrc = './my-image.png'; // Relative path
+const texture = new THREE.TextureLoader().load(MyImgSrc); // Texture of my image
+```
+
+> :warning: There are internal assets stored in the `./public/internal/` folder.
+> You should not put any files in this folder as it will be deleted when your 
+> EJX cube content is uploaded.
+
+### Using typescript
+
+You can develop your experiences using typescript by renaming
+`./src/content.js` -> `./src/content.ts`.  And then editing `./index.html` to
+reference the renamed file.
+
+```javascript
+    import("./src/content.js").then(module => { // Change this to `./src/content.ts`
+      player.setContent({filename: 'my-content', module});
+    });
+```
+
+This will not enable build time type checking, etc. To do that you will need to
+look into adding a `tsconfig.json`, installing typescript (`yarn add -D typescript`),
+and modifying the build command in `package.json` to `tsc --no-emit && vite build`.
+
+> :warning: The `@eyejack/ejx` library does not support typescript yet so I recommend
+> not enabling build time typechecking just yet.
+
+### Why are there external dependencies, can I upgrade three.js?
+
+EJX Cubes are designed to plug and play into the same three.js instance, which is
+managed by `@eyejack/ejx` library.  When this template builds your project it will
+not bundle three.js with it.  For that reason, we should always develop on
+`three@^0.149.0` as it's the currently supported version.

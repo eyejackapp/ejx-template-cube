@@ -1,12 +1,15 @@
 import { defineConfig } from 'vite';
 import { visualizer } from "rollup-plugin-visualizer";
 
+// Allow importing all of these file extensions
+const assetExtensions = ['jpg', 'gif', 'png', 'mp3', 'wav', 'mp4', 'webm', 'hdr', 'stl', 'bin', 'gltf'];
+
 export default defineConfig({
   base: '',
   server: {
     port: 3000,
   },
-  assetsInclude: ['**/*.bin', '**/*.gltf', '**/*.jpg', '**/*.hdr'],
+  assetsInclude: [...assetExtensions.map((ext) => `**/*.${ext}`), './src/assets/**'],
   build: {
     target: "esnext",
     minify: false,
