@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--
+WARNING: 
+DO NOT EDIT, THIS WILL NOT BE INCLUDED IN THE FINAL BUILD!
+THIS IS JUST TO ENABLE LOCAL DEVELOPMENT.
+
+FOR LK: This boilerplate should be possible to move into the eyejack library
+so the user doesn't have to see it.
+
+-->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<title>EyeJack X Cubes</title>
+
+<body>
+  <div id="app"></div>
+  <script type="module">
+    import Stats from 'three/addons/libs/stats.module.js';
+    import {GUI} from 'three/addons/libs/lil-gui.module.min.js';
+    import { EJPlayer } from '@eyejack/ejx';
+
+    const cubes = [
+      "None",
+      "Plain",
+      "Glass",
+      "Glass3",
+    ];
+    const environments = [
+      "None",
+      "Image"
+    ];
+
+    let state = {
+      cube: cubes[2],
+      environment: environments[1],
+    };
+
+    const stats = new Stats();
+    document.body.appendChild(stats.dom);
+
+    // Setup gui
+    const gui = new GUI();
+    gui.add(state, 'cube', cubes).name('Cube').onChange(value => {
+      player.setCube(value);
+    });
+    gui.add(state, 'environment', environments).name('Environment').onChange(value => {
+      player.setEnvironment(value);
+    });
+
+    // Setup player
+    const player = new EJPlayer({
+      type: "default",
+      gui: gui,
+    });
+    player.setCube(state.cube);
+    player.setEnvironment(state.environment);
+
+    function render() {
+      stats.begin();
+      player.render();
+      stats.end();
+      window.requestAnimationFrame(render);
+    }
+    render();
+
+    // Import and play the user's content
+    import("./src/content.js").then(module => {
+      player.setContent({filename: 'my-content', module});
+    });
+
+  </script>
+</body>
+
+</html>
